@@ -20,7 +20,7 @@ Example
 
 This is a kinda funny example, but if you want to get all the Sublime Text
 licenses publicly hosted on GitHub in a tarball, you just have to run the
-following:
+following.
 
 ```sh
 github-search-dl '"sublime_license" in:path' licenses.tar.gz
