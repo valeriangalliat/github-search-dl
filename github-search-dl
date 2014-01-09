@@ -12,6 +12,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+
 def gspages(tree):
     '''Returns the number of pages in a search result document.'''
 
