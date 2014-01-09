@@ -4,13 +4,13 @@ from getopt import getopt
 from lxml import html
 from os.path import basename
 import re
+from shutil import copyfileobj
 import sys
 import tarfile
 from tempfile import NamedTemporaryFile
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import urlopen
-
 
 def gspages(tree):
     '''Returns the number of pages in a search result document.'''
@@ -89,7 +89,7 @@ def main():
             file = NamedTemporaryFile()
 
             try:
-                shutil.copyfileobj(urlopen(url), file)
+                copyfileobj(urlopen(url), file)
             except HTTPError:
                 continue
 
