@@ -89,7 +89,7 @@ def main():
             file = NamedTemporaryFile()
 
             try:
-                file.write(urlopen(url).read())
+                shutil.copyfileobj(urlopen(url), file)
             except HTTPError:
                 continue
 
