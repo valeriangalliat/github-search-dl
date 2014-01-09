@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+from getopt import getopt
+from lxml import html
+from os.path import basename
+import re
+import sys
+import tarfile
+from tempfile import NamedTemporaryFile
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import urlopen
+
+
+def gspages(tree):
+    '''Returns the number of pages in a search result document.'''
+
+    # Get the last link of pagination (just before next link)
+    link = tree.find('//*[@class=\'pagination\']//a[last()-1]')
+
+    if link is None:
+        return 0
+
+    # Link text contains the last page number
+    return int(link.text)
+
+
+def gsfiles(tree):
+    '''Returns a list of blob URLs matched by the search.'''
+
+    # Get the second link of each title element
+    links = tree.findall(
+        '//*[@id=\'code_search_results\']//*[@class=\'title\']//a[2]')
+
+    # Flatten links
+    return [link.get('href') for link in links]
+
+
+def gsraw(url):
+    '''Converts a blob file URL to a raw file URL.'''
+    return re.sub(r'/blob/', r'/raw/', url)
+
+
+def gsabs(url):
+    '''Converts an absolute URL without domain to a complete GitHub URL.'''
+    return 'https://github.com' + url
+
+
+def gsget(query, page=1):
+    '''Returns a search page document for given query and page number.'''
+
+    base = 'https://github.com/search?'
+    url = base + urlencode({'q': query, 'p': str(page), 'type': 'code'})
+    return html.parse(urlopen(url))
+
+
+def gswalkp(query):
+    '''Iterator on search pages for given query.'''
+
+    tree = gsget(query)
+    pages = gspages(tree)
+
+    yield tree
+
+    if pages == 0:
+        return
+
+    for page in range(2, pages + 1):
+        yield gsget(query, page)
+
+
+def gswalkf(query):
+    '''Iterator on search result files for given query.'''
+
+    for tree in gswalkp(query):
+        for url in gsfiles(tree):
+            yield url
+
+
+def main():
+    assert len(sys.argv) == 3, "Expected 2 arguments."
+
+    query = sys.argv[1]
+    out = sys.argv[2]
+
+    with tarfile.open(out, 'w:gz') as tar:
+        for i, url in enumerate(gswalkf(query)):
+            url = gsabs(gsraw(url))
+            file = NamedTemporaryFile()
+
+            try:
+                file.write(urlopen(url).read())
+            except HTTPError:
+                continue
+
+            name = str(i) + '-' + basename(url)
+            tar.add(file.name, arcname=name)
+
+            print(url)
+
+
+if __name__ == '__main__':
+    main()
