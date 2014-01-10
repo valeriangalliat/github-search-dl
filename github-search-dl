@@ -93,7 +93,7 @@ def main():
             try:
                 file.write(urlopen(url).read())
             except HTTPError as e:
-                print(e.code + ' with ' + url)
+                print(str(e.code) + ' with ' + url)
                 continue
 
             file.close()
