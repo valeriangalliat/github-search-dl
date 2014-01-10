@@ -2,6 +2,7 @@
 
 from getopt import getopt
 from lxml import html
+from os import remove
 from os.path import basename
 import re
 from shutil import copyfileobj
@@ -79,7 +80,7 @@ def gswalkf(query):
 
 
 def main():
-    assert len(sys.argv) == 3, "Expected 2 arguments."
+    assert len(sys.argv) == 3, 'Expected 2 arguments.'
 
     query = sys.argv[1]
     out = sys.argv[2]
@@ -87,15 +88,19 @@ def main():
     with tarfile.open(out, 'w:gz') as tar:
         for i, url in enumerate(gswalkf(query)):
             url = gsabs(gsraw(url))
-            file = NamedTemporaryFile()
+            file = NamedTemporaryFile(delete=False)
 
             try:
-                copyfileobj(urlopen(url), file)
-            except HTTPError:
+                file.write(urlopen(url).read())
+            except HTTPError as e:
+                print(e.code + ' with ' + url)
                 continue
+
+            file.close()
 
             name = str(i) + '-' + basename(url)
             tar.add(file.name, arcname=name)
+            remove(file.name)
 
             print(url)
 
