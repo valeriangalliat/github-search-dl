@@ -15,8 +15,8 @@ Dependencies
 - `python3`
 - `python3-lxml`
 
-Example
--------
+Examples
+--------
 
 This is a kinda funny example, but if you want to get all the Sublime Text
 licenses publicly hosted on GitHub in a tarball, you just have to run the
