@@ -1,7 +1,7 @@
-GitHub Search Download
+GitHub search download
 ======================
 
-Download matched files from a GitHub code search.
+> Download matched files from a GitHub code search.
 
 Description
 -----------
@@ -12,8 +12,8 @@ to download all the matched files in a tarball.
 Dependencies
 ------------
 
-- `python3`
-- `python3-lxml`
+* `python3`
+  * `lxml`
 
 Examples
 --------
